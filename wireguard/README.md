@@ -1,4 +1,8 @@
 # wireguard salt state
+These states currently only support Debian-based machines.
+
+This was manually tested on:
+- Raspbian GNU/Linux 9 (stretch) on a Raspberry PI 3
 
 ## Generating private keys
 ```bash
