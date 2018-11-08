@@ -1,0 +1,57 @@
+{% from "systemd/services/macros.jinja" import service_file %}
+
+{% macro timer(service_name,
+               exec_start,
+               period='*:0/15',
+               watch=[],
+               timer_config=none,
+               erased=False,
+               service_config={'Type': 'oneshot'}) -%}
+
+{{ service_file(service_name,
+                exec_start,
+                service_config=service_config,
+                erased=erased) }}
+
+/lib/systemd/system/{{ service_name }}.timer:
+  {% if erased %}
+  file.absent: []
+  {% else %}
+  file.managed:
+    - source: salt://systemd/timers/files/timer.tmpl
+    - makedirs: True
+    - template: jinja
+    - mode: 644
+    - context:
+      service_name: {{ service_name }}
+      period: '{{ period }}'
+      timer_config: {{ timer_config if timer_config is not none else { 'Persistent': 'true' } }}
+  {% endif %}
+
+{{ service_name }}.timer.systemctl_reload:
+  module.run:
+    - name: service.systemctl_reload
+    - onchanges:
+      - /lib/systemd/system/{{ service_name }}.service
+      - /lib/systemd/system/{{ service_name }}.timer
+  {% for watch_entry in watch %}
+      - {{ watch_entry }}
+  {% endfor %}
+
+{{ service_name }}.timer:
+  {% if erased %}
+  service.dead:
+    - enable: False
+  {% else %}
+  service.running:
+    - enable: True
+  {% endif %}
+    - watch:
+      - /lib/systemd/system/{{ service_name }}.service
+      - /lib/systemd/system/{{ service_name }}.timer
+      - {{ service_name }}.timer.systemctl_reload
+    {% for watch_entry in watch %}
+      - {{ watch_entry }}
+    {% endfor %}
+
+{%- endmacro %}

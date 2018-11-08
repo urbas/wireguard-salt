@@ -1,0 +1,60 @@
+{% macro service_file(service_name,
+                      exec_start,
+                      service_config=none,
+                      install_config=none,
+                      unit_config=none,
+                      erased=False) -%}
+/lib/systemd/system/{{ service_name }}.service:
+  {% if erased %}
+  file.absent: []
+  {% else %}
+  file.managed:
+    - source: salt://systemd/services/files/service.tmpl
+    - makedirs: True
+    - template: jinja
+    - mode: 644
+    - context:
+      service_name: {{ service_name }}
+      exec_start: {{ exec_start }}
+      service_config: {{ service_config if service_config is not none else { 'Restart': 'always' } }}
+      install_config: {{ install_config if install_config is not none else { 'WantedBy': 'multi-user.target' } }}
+      unit_config: {{ unit_config if unit_config is not none else { 'After': 'network-online.target' } }}
+  {% endif %}
+{%- endmacro %}
+
+{% macro service(service_name,
+                 exec_start,
+                 watch=[],
+                 service_config=none,
+                 install_config=none,
+                 unit_config=none,
+                 erased=False) -%}
+
+{{ service_file(service_name,
+                exec_start=exec_start,
+                service_config=service_config,
+                install_config=install_config,
+                unit_config=unit_config,
+                erased=erased) }}
+
+{{ service_name }}.service.systemctl_reload:
+  module.run:
+    - name: service.systemctl_reload
+    - onchanges:
+      - /lib/systemd/system/{{ service_name }}.service
+
+{{ service_name }}:
+  {% if erased %}
+  service.dead:
+    - enable: False
+  {% else %}
+  service.running:
+    - enable: True
+  {% endif %}
+    - watch:
+      - /lib/systemd/system/{{ service_name }}.service
+      - {{ service_name }}.service.systemctl_reload
+    {% for watch_entry in watch %}
+      - {{ watch_entry }}
+    {% endfor %}
+{%- endmacro %}

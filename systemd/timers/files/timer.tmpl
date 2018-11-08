@@ -1,0 +1,12 @@
+[Unit]
+Description={{ service_name }} timer
+
+[Timer]
+Unit={{ service_name }}.service
+OnCalendar={{ period }}
+{% for key, value in timer_config | dictsort() %}
+{{ key }}={{ value }}
+{% endfor %}
+
+[Install]
+WantedBy=timers.target

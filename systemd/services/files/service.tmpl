@@ -1,0 +1,16 @@
+[Unit]
+Description={{ service_name }}
+{% for key, value in unit_config | dictsort() %}
+{{ key }}={{ value }}
+{% endfor %}
+
+[Service]
+ExecStart={{ exec_start }}
+{% for key, value in service_config | dictsort() %}
+{{ key }}={{ value }}
+{% endfor %}
+
+[Install]
+{% for key, value in install_config | dictsort() %}
+{{ key }}={{ value }}
+{% endfor %}
