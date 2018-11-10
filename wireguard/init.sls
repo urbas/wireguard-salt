@@ -2,24 +2,47 @@
 {% from "systemd/services/macros.jinja" import service %}
 
 ## Configuration
-{%- load_yaml as defaults %}
+{%- load_yaml as common_defaults %}
 # Find latest release at: https://www.wireguard.com/install/#compiling-from-source
 version: 0.0.20181018
 tar_sha256sum: 'af05824211b27cbeeea2b8d6b76be29552c0d80bfe716471215e4e43d259e327'
 interfaces: {}
 {%- endload %}
 
-{% set config = salt['pillar.get']('wireguard', default=defaults, merge=True) %}
+{%- load_yaml as raspbian_defaults %}
+deps:
+  - libmnl-dev
+  - libelf-dev
+  - raspberrypi-kernel-headers
+  - build-essential
+  - pkg-config
+{%- endload %}
+
+{%- load_yaml as ubuntu_defaults %}
+deps:
+  - libmnl-dev
+  - libelf-dev
+  - linux-headers-generic
+  - build-essential
+  - pkg-config
+{%- endload %}
+
+{% set os_specific_defaults = salt['grains.filter_by'](
+  grain="os",
+  base="common",
+  lookup_dict={
+    "common": common_defaults,
+    "Raspbian": raspbian_defaults,
+    "Ubuntu": ubuntu_defaults
+  }
+) %}
+
+{% set config = salt['pillar.get']('wireguard', default=os_specific_defaults, merge=True) %}
 
 ## Installation
 wireguard.deps.installed:
   pkg.installed:
-    - pkgs:
-      - libmnl-dev
-      - libelf-dev
-      - raspberrypi-kernel-headers
-      - build-essential
-      - pkg-config
+    - pkgs: {{ config.deps | json }}
 
 /var/sources/wireguard:
   file.directory:
@@ -43,6 +66,8 @@ wireguard.install:
     - name: make && make install && echo "{{ config.tar_sha256sum }}" > /var/sources/wireguard.build.sha256sum
     - cwd: /var/sources/wireguard/WireGuard-{{ config.version }}/src
     - unless: 'grep -q "{{ config.tar_sha256sum }}" /var/sources/wireguard.build.sha256sum'
+    - watch:
+      - /var/sources/wireguard
 
 ## Interface Setup
 {% for interface, interface_config in config.interfaces | dictsort %}

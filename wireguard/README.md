@@ -5,6 +5,7 @@ and turns the interfaces on.
 These states can also refresh your peers periodically. This is useful if your peers have dynamic DNS names.
 
 Supported architectures (manually tested):
+- Ubuntu 18.04 (Bionic Beaver) on x86_64
 - Raspbian GNU/Linux 9 (stretch) on a Raspberry PI 3
 
 ## Example pillar data
