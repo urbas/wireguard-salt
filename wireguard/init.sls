@@ -5,6 +5,7 @@
 # Find latest release at: https://www.wireguard.com/install/#compiling-from-source
 version: 0.0.20181018
 tar_sha256sum: 'af05824211b27cbeeea2b8d6b76be29552c0d80bfe716471215e4e43d259e327'
+interfaces: {}
 {%- endload %}
 
 {% set config = salt['pillar.get']('wireguard', default=defaults, merge=True) %}
@@ -41,37 +42,41 @@ wireguard.install:
     - cwd: /var/sources/wireguard/WireGuard-{{ config.version }}/src
     - unless: 'grep -q "{{ config.tar_sha256sum }}" /var/sources/wireguard.build.sha256sum'
 
-/etc/wireguard/vpn.conf:
+{% for interface, interface_config in config.interfaces | dictsort %}
+/etc/wireguard/{{ interface }}.conf:
   file.managed:
     - source: salt://wireguard/files/wireguard.conf
     - template: jinja
     - context:
-        config: {{ config | json }}
+        config: {{ interface_config | json }}
     - mode: 660
 
 # This brings up the wireguard interface
 {{ service(
-  service_name="wireguard-vpn",
-  exec_start="/usr/bin/wg-quick up vpn",
+  erased=interface_config.disabled | default(False),
+  service_name="wireguard-" + interface,
+  exec_start="/usr/bin/wg-quick up " + interface,
   service_config={
     "Type": "oneshot",
     "RemainAfterExit": "yes",
-    "ExecStop": "/usr/bin/wg-quick down vpn"
+    "ExecStop": "/usr/bin/wg-quick down " + interface
   },
   unit_config={
     "After": "network-online.target",
     "Wants": "network-online.target"
   },
-  watch=["/etc/wireguard/vpn.conf", "wireguard.install"]
+  watch=["/etc/wireguard/" + interface + ".conf", "wireguard.install"]
 ) }}
 
 # This refreshes the peer's endpoint periodically.
-{% for peer, peer_config in config.peers | dictsort %}
-  {% if peer_config.refresh_endpoint | default(False) %}
+  {% for peer, peer_config in interface_config.peers | dictsort %}
+    {% if peer_config.refresh_endpoint | default(False) %}
 {{ timer(
-  service_name="wireguard-vpn-refresh-peer-" + peer,
-  exec_start="/usr/bin/wg set vpn peer " + peer_config.public_key + " allowed-ips " + peer_config.allowed_ips + " endpoint " + peer_config.endpoint,
+  erased=interface_config.disabled | default(False),
+  service_name="wireguard-" + interface + "-refresh-peer-" + peer,
+  exec_start="/usr/bin/wg set " + interface + " peer " + peer_config.public_key + " allowed-ips " + peer_config.allowed_ips + " endpoint " + peer_config.endpoint,
   period='*:0/1'
 ) }}
-  {% endif %}
+    {% endif %}
+  {% endfor %}
 {% endfor %}
