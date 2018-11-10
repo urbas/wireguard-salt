@@ -1,5 +1,4 @@
 {% from "systemd/timers/macros.jinja" import timer %}
-{% from "systemd/services/macros.jinja" import service %}
 
 ## Configuration
 {%- load_yaml as common_defaults %}
@@ -71,6 +70,8 @@ wireguard.install:
 
 ## Interface Setup
 {% for interface, interface_config in config.interfaces | dictsort %}
+  {% set is_interface_disabled = interface_config.disabled | default(False) %}
+
 /etc/wireguard/{{ interface }}.conf:
   file.managed:
     - source: salt://wireguard/files/wireguard.conf
@@ -79,28 +80,35 @@ wireguard.install:
         config: {{ interface_config | json }}
     - mode: 660
 
-# This brings up the wireguard interface
-{{ service(
-  erased=interface_config.disabled | default(False),
-  service_name="wireguard-" + interface,
-  exec_start="/usr/bin/wg-quick up " + interface,
-  service_config={
-    "Type": "oneshot",
-    "RemainAfterExit": "yes",
-    "ExecStop": "/usr/bin/wg-quick down " + interface
-  },
-  unit_config={
-    "After": "network-online.target",
-    "Wants": "network-online.target"
-  },
-  watch=["/etc/wireguard/" + interface + ".conf", "wireguard.install"]
-) }}
+# This refreshes systemd's unit file caches
+wireguard.interface.{{ interface }}.systemctl_reload:
+  module.run:
+    - name: service.systemctl_reload
+    - onchanges:
+      - wireguard.install
+      - /etc/wireguard/{{ interface }}.conf
+
+# This brings up or tears down the interface
+wireguard.interface.{{ interface }}.service:
+{% if is_interface_disabled %}
+  service.dead:
+    - name: wg-quick@{{ interface }}
+    - enable: False
+{% else %}
+  service.running:
+    - name: wg-quick@{{ interface }}
+    - enable: True
+    - watch:
+      - wireguard.install
+      - /etc/wireguard/{{ interface }}.conf
+      - wireguard.interface.{{ interface }}.systemctl_reload
+{% endif %}
 
 # This refreshes the peer's endpoint periodically.
   {% for peer, peer_config in interface_config.peers | dictsort %}
     {% if peer_config.refresh_endpoint | default(False) %}
 {{ timer(
-  erased=interface_config.disabled | default(False),
+  erased=is_interface_disabled,
   service_name="wireguard-" + interface + "-refresh-peer-" + peer,
   exec_start="/usr/bin/wg set " + interface + " peer " + peer_config.public_key + " allowed-ips " + peer_config.allowed_ips + " endpoint " + peer_config.endpoint,
   period='*:0/1'

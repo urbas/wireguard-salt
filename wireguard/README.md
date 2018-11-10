@@ -1,8 +1,8 @@
-# wireguard salt state
+# wireguard salt formula
 Downloads Wireguard, compiles it from sources, installs it on the machine, configures Wireguard interfaces,
 and turns the interfaces on.
 
-These states can also refresh your peers periodically. This is useful if your peers have dynamic DNS names.
+This salt formula can also refresh your peers periodically. This is useful if your peers have dynamic DNS names.
 
 Supported architectures (manually tested):
 - Ubuntu 18.04 (Bionic Beaver) on x86_64
