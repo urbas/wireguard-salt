@@ -1,6 +1,7 @@
 {% from "systemd/timers/macros.jinja" import timer %}
 {% from "systemd/services/macros.jinja" import service %}
 
+## Configuration
 {%- load_yaml as defaults %}
 # Find latest release at: https://www.wireguard.com/install/#compiling-from-source
 version: 0.0.20181018
@@ -10,6 +11,7 @@ interfaces: {}
 
 {% set config = salt['pillar.get']('wireguard', default=defaults, merge=True) %}
 
+## Installation
 wireguard.deps.installed:
   pkg.installed:
     - pkgs:
@@ -42,6 +44,7 @@ wireguard.install:
     - cwd: /var/sources/wireguard/WireGuard-{{ config.version }}/src
     - unless: 'grep -q "{{ config.tar_sha256sum }}" /var/sources/wireguard.build.sha256sum'
 
+## Interface Setup
 {% for interface, interface_config in config.interfaces | dictsort %}
 /etc/wireguard/{{ interface }}.conf:
   file.managed:

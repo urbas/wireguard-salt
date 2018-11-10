@@ -15,14 +15,13 @@ wireguard:
       address: 10.0.0.1/24
       private_key: "your private key here"
       listen_port: 12345
+      disabled: False # This will remove the interface and disable all associated services
       peers:
         other_host:
           public_key: "your public key here"
           endpoint: yourotherhost.com:12345
           allowed_ips: 10.0.0.2/32
-          # Use this if the endpoint is a dynamic DNS name.
-          # This will refresh the peer's endpoint every minute.
-          refresh_endpoint: True
+          refresh_endpoint: True # Use this if the endpoint is a dynamic DNS name. This will refresh the peer's endpoint every minute.
 ```
 
 ## Generating private keys
