@@ -15,7 +15,7 @@ wireguard:
       address: 10.0.0.1/24
       private_key: "your private key here"
       listen_port: 12345
-      disabled: False # This will remove the interface and disable all associated services
+      disabled: False # Optional: If set to true, it will remove the interface and disable all associated services
       peers:
         other_host:
           public_key: "your public key here"
