@@ -110,7 +110,7 @@ wireguard.interface.{{ interface }}.service:
 {{ timer(
   erased=is_interface_disabled,
   service_name="wireguard-" + interface + "-refresh-peer-" + peer,
-  exec_start="/usr/bin/wg set " + interface + " peer " + peer_config.public_key + " allowed-ips " + peer_config.allowed_ips + " endpoint " + peer_config.endpoint,
+  exec_start="/usr/bin/wg set " + interface + " peer " + peer_config.conf.PublicKey + " allowed-ips " + peer_config.conf.AllowedIPs + " endpoint " + peer_config.conf.Endpoint,
   period='*:0/1'
 ) }}
     {% endif %}

@@ -12,17 +12,19 @@ Supported architectures (manually tested):
 ```yaml
 wireguard:
   interfaces:
-    vpn:
-      address: 10.0.0.1/24
-      private_key: "your private key here"
-      listen_port: 12345
+    wg0:
       disabled: False # Optional: If set to true, it will remove the interface and disable all associated services
+      conf: # The content of this dictionary goes into the [Interface] section of the /etc/wireguard/wg0.conf file
+        Address: 10.0.0.1/24
+        PrivateKey: "your private key here"
+        ListenPort: 12345
       peers:
         other_host:
-          public_key: "your public key here"
-          endpoint: yourotherhost.com:12345
-          allowed_ips: 10.0.0.2/32
           refresh_endpoint: True # Use this if the endpoint is a dynamic DNS name. This will refresh the peer's endpoint every minute.
+          conf: # The content of this dictionary goes into [Peer] sections of the /etc/wireguard/wg0.conf file
+            PublicKey: "your public key here"
+            Endpoint: yourotherhost.com:12345
+            AllowedIPs: 10.0.0.2/32
 ```
 
 ## Generating private keys
