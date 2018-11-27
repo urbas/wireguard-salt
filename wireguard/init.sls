@@ -90,11 +90,11 @@ wireguard.interface.{{ interface }}.systemctl_reload:
 
 # This brings up or tears down the interface
 wireguard.interface.{{ interface }}.service:
-{% if is_interface_disabled %}
+  {% if is_interface_disabled %}
   service.dead:
     - name: wg-quick@{{ interface }}
     - enable: False
-{% else %}
+  {% else %}
   service.running:
     - name: wg-quick@{{ interface }}
     - enable: True
@@ -102,13 +102,13 @@ wireguard.interface.{{ interface }}.service:
       - wireguard.install
       - /etc/wireguard/{{ interface }}.conf
       - wireguard.interface.{{ interface }}.systemctl_reload
-{% endif %}
+  {% endif %}
 
 # This refreshes the peer's endpoint periodically.
   {% for peer, peer_config in interface_config.peers | dictsort %}
     {% if peer_config.refresh_endpoint | default(False) %}
 {{ timer(
-  erased=is_interface_disabled,
+  disabled=is_interface_disabled,
   service_name="wireguard-" + interface + "-refresh-peer-" + peer,
   exec_start="/usr/bin/wg set " + interface + " peer " + peer_config.conf.PublicKey + " allowed-ips " + peer_config.conf.AllowedIPs + " endpoint " + peer_config.conf.Endpoint,
   period='*:0/1'

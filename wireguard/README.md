@@ -13,14 +13,17 @@ Supported architectures (manually tested):
 wireguard:
   interfaces:
     wg0:
-      disabled: False # Optional: If set to true, it will remove the interface and disable all associated services
+      disabled: False # Optional: If set to true, the interface will be shut down. All files will remain
+                      # in place. This means you can start the interface manually yourself with:
+                      #   sudo systemctl start wg-quick@wg0
       conf: # The content of this dictionary goes into the [Interface] section of the /etc/wireguard/wg0.conf file
         Address: 10.0.0.1/24
         PrivateKey: "your private key here"
         ListenPort: 12345
       peers:
         other_host:
-          refresh_endpoint: True # Use this if the endpoint is a dynamic DNS name. This will refresh the peer's endpoint every minute.
+          refresh_endpoint: True # Use this if the endpoint is a dynamic DNS name. This will refresh the
+                                 # peer's endpoint every minute.
           conf: # The content of this dictionary goes into [Peer] sections of the /etc/wireguard/wg0.conf file
             PublicKey: "your public key here"
             Endpoint: yourotherhost.com:12345

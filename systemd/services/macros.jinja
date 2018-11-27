@@ -28,7 +28,8 @@
                  service_config=none,
                  install_config=none,
                  unit_config=none,
-                 erased=False) -%}
+                 erased=False,
+                 disabled=False) -%}
 
 {{ service_file(service_name,
                 exec_start=exec_start,
@@ -44,7 +45,7 @@
       - /lib/systemd/system/{{ service_name }}.service
 
 {{ service_name }}:
-  {% if erased %}
+  {% if erased or disabled %}
   service.dead:
     - enable: False
   {% else %}

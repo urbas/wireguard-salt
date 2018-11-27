@@ -2,10 +2,11 @@
 
 {% macro timer(service_name,
                exec_start,
-               period='*:0/15',
+               period='*-*-* *:00/15:00',
                watch=[],
                timer_config=none,
                erased=False,
+               disabled=False,
                service_config={'Type': 'oneshot'}) -%}
 
 {{ service_file(service_name,
@@ -39,7 +40,7 @@
   {% endfor %}
 
 {{ service_name }}.timer:
-  {% if erased %}
+  {% if erased or disabled %}
   service.dead:
     - enable: False
   {% else %}
