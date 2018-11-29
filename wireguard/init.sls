@@ -62,9 +62,9 @@ wireguard.deps.installed:
 #   'systemd/wg-quick@.service' -> '/lib/systemd/system/wg-quick@.service'
 wireguard.install:
   cmd.run:
-    - name: make && make install && echo "{{ config.tar_sha256sum }}" > /var/sources/wireguard.build.sha256sum
+    - name: 'make clean && make && make install && echo "{{ config.tar_sha256sum }}" > /var/sources/wireguard.build.sha256sum && echo "$(uname -r)" > /var/sources/wireguard.build.uname-r'
     - cwd: /var/sources/wireguard/WireGuard-{{ config.version }}/src
-    - unless: 'grep -q "{{ config.tar_sha256sum }}" /var/sources/wireguard.build.sha256sum'
+    - unless: 'grep -q "{{ config.tar_sha256sum }}" /var/sources/wireguard.build.sha256sum && grep -q "$(uname -r)" /var/sources/wireguard.build.uname-r'
     - watch:
       - /var/sources/wireguard
 
