@@ -3,8 +3,8 @@
 ## Configuration
 {%- load_yaml as common_defaults %}
 # Find latest release at: https://www.wireguard.com/install/#compiling-from-source
-version: 0.0.20181018
-tar_sha256sum: 'af05824211b27cbeeea2b8d6b76be29552c0d80bfe716471215e4e43d259e327'
+version: 0.0.20181218
+tar_sha256sum: '2e9f86acefa49dbfb7fa6f5e10d543f1885a2d5460cd5e102696901107675735'
 interfaces: {}
 {%- endload %}
 
