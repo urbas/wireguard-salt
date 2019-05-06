@@ -2,9 +2,11 @@
 
 ## Configuration
 {%- load_yaml as common_defaults %}
-# Find latest release at: https://www.wireguard.com/install/#compiling-from-source
-version: 0.0.20181218
-tar_sha256sum: '2e9f86acefa49dbfb7fa6f5e10d543f1885a2d5460cd5e102696901107675735'
+# Find latest release from the list of tags at: https://git.zx2c4.com/WireGuard/
+# Find compile from source instructions: https://www.wireguard.com/install/#compiling-from-source
+# Get sha256sum: curl 'https://git.zx2c4.com/WireGuard/snapshot/WireGuard-<version>.tar.xz' | sha256sum
+version: 0.0.20190406
+tar_sha256sum: '2f06f3adf70b95e74a7736a22dcf6e9ef623b311a15b7d55b5474e57c3d0415b'
 interfaces: {}
 {%- endload %}
 
@@ -52,14 +54,15 @@ wireguard.deps.installed:
     - clean: True
 
 # This installs the following:
-#   'wg' -> '/usr/bin/wg'
-#   'man/wg.8' -> '/usr/share/man/man8/wg.8'
-#   'completion/wg.bash-completion' -> '/usr/share/bash-completion/completions/wg'
-#   'wg-quick/linux.bash' -> '/usr/bin/wg-quick'
-#   install: creating directory '/etc/wireguard'
-#   'man/wg-quick.8' -> '/usr/share/man/man8/wg-quick.8'
-#   'completion/wg-quick.bash-completion' -> '/usr/share/bash-completion/completions/wg-quick'
-#   'systemd/wg-quick@.service' -> '/lib/systemd/system/wg-quick@.service'
+#   /lib/modules/$(uname -r)/extra/wireguard.ko
+#   '/usr/bin/wg'
+#   '/usr/share/man/man8/wg.8'
+#   '/usr/share/bash-completion/completions/wg'
+#   '/usr/bin/wg-quick'
+#   '/etc/wireguard'
+#   '/usr/share/man/man8/wg-quick.8'
+#   '/usr/share/bash-completion/completions/wg-quick'
+#   '/lib/systemd/system/wg-quick@.service'
 wireguard.install:
   cmd.run:
     - name: 'make clean && make && make install && echo "{{ config.tar_sha256sum }}" > /var/sources/wireguard.build.sha256sum && echo "$(uname -r)" > /var/sources/wireguard.build.uname-r'
