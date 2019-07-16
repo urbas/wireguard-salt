@@ -4,9 +4,9 @@
 {%- load_yaml as common_defaults %}
 # Find latest release from the list of tags at: https://git.zx2c4.com/WireGuard/
 # Find compile from source instructions: https://www.wireguard.com/install/#compiling-from-source
-# Get sha256sum: curl 'https://git.zx2c4.com/WireGuard/snapshot/WireGuard-<version>.tar.xz' | sha256sum
-version: 0.0.20190406
-tar_sha256sum: '2f06f3adf70b95e74a7736a22dcf6e9ef623b311a15b7d55b5474e57c3d0415b'
+# Get sha256sum: curl 'https://git.zx2c4.com/WireGuard/snapshot/WireGuard-0.0.20190702.tar.xz' | sha256sum
+version: 0.0.20190702
+tar_sha256sum: '1a1311bc71abd47a72c47d918be3bacc486b3de90734661858af75cc990dbaac'
 interfaces: {}
 {%- endload %}
 

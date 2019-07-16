@@ -1,16 +1,21 @@
-[Unit]
-Description={{ service_name }}
-{% for key, value in unit_config | dictsort() %}
+{%- macro emit_key_values(data) %}
+{%- if data is mapping -%}
+{% for key, value in data | dictsort() -%}
 {{ key }}={{ value }}
 {% endfor %}
+{%- else -%}
+{% for key, value in data -%}
+{{ key }}={{ value }}
+{% endfor %}
+{%- endif -%}
+{% endmacro -%}
+[Unit]
+Description={{ service_name }}
+{{ emit_key_values(unit_config) }}
 
 [Service]
 ExecStart={{ exec_start }}
-{% for key, value in service_config | dictsort() %}
-{{ key }}={{ value }}
-{% endfor %}
+{{ emit_key_values(service_config) }}
 
 [Install]
-{% for key, value in install_config | dictsort() %}
-{{ key }}={{ value }}
-{% endfor %}
+{{ emit_key_values(install_config) }}

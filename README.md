@@ -33,7 +33,7 @@ wireguard:
 
 ## Generating private keys
 ```bash
-mkdir -p ~/.wg && touch ~/.wg/private && chmod 660 ~/.wg/private && wg genkey > ~/.wg/private
+mkdir -p ~/.wg && touch ~/.wg/private && chmod 600 ~/.wg/private && wg genkey > ~/.wg/private
 ```
 
 ## Getting the public key
