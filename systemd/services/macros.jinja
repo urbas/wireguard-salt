@@ -16,9 +16,9 @@
     - context:
       service_name: {{ service_name }}
       exec_start: {{ exec_start }}
-      service_config: {{ service_config if service_config is not none else { 'Restart': 'always' } }}
-      install_config: {{ install_config if install_config is not none else { 'WantedBy': 'multi-user.target' } }}
-      unit_config: {{ unit_config if unit_config is not none else { 'After': 'network-online.target' } }}
+      service_config: {{ (service_config if service_config is not none else { 'Restart': 'always' }) | json }}
+      install_config: {{ (install_config if install_config is not none else { 'WantedBy': 'multi-user.target' }) | json }}
+      unit_config: {{ (unit_config if unit_config is not none else { 'After': 'network-online.target' }) | json }}
   {% endif %}
 {%- endmacro %}
 
